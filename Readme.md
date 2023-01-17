@@ -2,6 +2,8 @@
 
 Shows the playerlist of your server in Discord.
 
+![image](https://user-images.githubusercontent.com/22680656/213012714-c458dd08-a61e-45c4-9edf-9e5179354d19.png)
+
 ```py
 # battlefield server to follow
 server_name = '[BoB]#1 EU All CQ'
