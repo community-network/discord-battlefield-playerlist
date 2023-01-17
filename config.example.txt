@@ -1,0 +1,15 @@
+// battlefield server to follow
+server_name = '[BoB]#1 EU All CQ'
+// discord token to use
+token = 'SECRET_DISCORD_TOKEN'
+// discord channel id it has to post the messages to
+channel = 106456457126165306
+# messages it will edit for showing serverinfo
+// (used if bot is restarted, should be empty on first startup)
+messages = [
+    1064877261444087869,
+    1064877262756909086,
+    1064877263901958194,
+    1064877265051201639,
+    1064877267001548860,
+]
