@@ -189,7 +189,7 @@ async fn get_config() -> structs::config::SeederConfig {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    flexi_logger::Logger::try_with_str("info")
+    flexi_logger::Logger::try_with_str("warn,discord_playerlist=info")
         .unwrap_or_else(|e| panic!("Logger initialization failed with {}", e))
         .start()?;
 
