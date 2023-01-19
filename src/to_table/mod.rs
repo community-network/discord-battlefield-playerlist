@@ -2,6 +2,7 @@ use crate::structs;
 
 use chrono::Utc;
 use tabular::row;
+pub mod bf4_player_list;
 pub mod player_list;
 pub mod seeder_player_list;
 

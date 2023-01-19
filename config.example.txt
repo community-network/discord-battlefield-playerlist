@@ -13,3 +13,5 @@ messages = [
     1064877265051201639,
     1064877267001548860,
 ]
+# game to use, can be bf4 or bf1
+game = 'Bf4'

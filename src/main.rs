@@ -5,13 +5,11 @@ use serenity::{
 };
 use std::{
     sync::{atomic, Arc},
-    time,
+    time, vec,
 };
-use structs::{config::SeederConfig, player_list::PlayerList};
+use warp::Filter;
 mod structs;
 mod to_table;
-
-use warp::Filter;
 
 struct Handler;
 
@@ -51,8 +49,8 @@ impl EventHandler for Handler {
         // loop in seperate async
         tokio::spawn(async move {
             loop {
-                cfg = match gather_table(&cfg.server_name, &client).await {
-                    Ok((_player_list, title, tables)) => send_info(&ctx, cfg, tables, title).await,
+                cfg = match gather_table(&cfg, &client).await {
+                    Ok((title, tables)) => send_info(&ctx, cfg, tables, title).await,
                     Err(e) => {
                         log::error!("Couldn't get serverinfo: {:#?}", e);
                         cfg
@@ -68,10 +66,10 @@ impl EventHandler for Handler {
 
 async fn send_info(
     ctx: &Context,
-    mut cfg: SeederConfig,
+    mut cfg: structs::config::SenderConfig,
     tables: Vec<String>,
     title: String,
-) -> SeederConfig {
+) -> structs::config::SenderConfig {
     if cfg.messages.len() >= 5 {
         let mut index = 0;
 
@@ -143,35 +141,50 @@ async fn send_info(
 }
 
 async fn gather_table(
-    server: &str,
+    cfg: &structs::config::SenderConfig,
     client: &reqwest::Client,
-) -> anyhow::Result<(PlayerList, String, Vec<String>)> {
-    let result = to_table::player_list::request_player_list(server, client)
-        .await
-        .unwrap();
+) -> anyhow::Result<(String, Vec<String>)> {
+    Ok(match cfg.game {
+        structs::config::Games::Bf1 => {
+            let result = to_table::player_list::request_player_list(&cfg.server_name, client)
+                .await
+                .unwrap();
 
-    let (title, tables) =
-        match to_table::seeder_player_list::request_player_list(server, client).await {
-            Ok(seeder_result) => {
-                to_table::seeder_player_list::to_tables(&seeder_result, &result.clone()).await
-            }
-            Err(_) => to_table::player_list::to_tables(&result).await,
-        };
+            let (title, tables) =
+                match to_table::seeder_player_list::request_player_list(&cfg.server_name, client)
+                    .await
+                {
+                    Ok(seeder_result) => {
+                        to_table::seeder_player_list::to_tables(&seeder_result, &result.clone())
+                            .await
+                    }
+                    Err(_) => to_table::player_list::to_tables(&result).await,
+                };
 
-    Ok((result, title, tables))
+            (title, tables)
+        }
+        structs::config::Games::Bf4 => {
+            let result = to_table::bf4_player_list::request_player_list(&cfg.server_name, client)
+                .await
+                .unwrap();
+
+            to_table::bf4_player_list::to_tables(&result).await
+        }
+    })
 }
 
-async fn get_config() -> structs::config::SeederConfig {
-    let cfg: structs::config::SeederConfig = match confy::load_path("config.txt") {
+async fn get_config() -> structs::config::SenderConfig {
+    let cfg: structs::config::SenderConfig = match confy::load_path("config.txt") {
         Ok(config) => config,
         Err(e) => {
             log::error!("error in config.txt: {}", e);
             log::warn!("changing back to default..");
-            structs::config::SeederConfig {
+            structs::config::SenderConfig {
                 server_name: "".into(),
                 token: "".into(),
                 channel: 0,
                 messages: vec![],
+                game: structs::config::Games::from("bf1"),
             }
         }
     };

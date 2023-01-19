@@ -20,4 +20,6 @@ messages = [
     1064877265051201639,
     1064877267001548860,
 ]
+# game to use, can be Bf4 or Bf1 (capital letter B)
+game = 'Bf4'
 ```
