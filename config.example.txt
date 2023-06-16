@@ -6,12 +6,6 @@ token = 'SECRET_DISCORD_TOKEN'
 channel = 106456457126165306
 # messages it will edit for showing serverinfo
 # (used if bot is restarted, should be empty on first startup)
-messages = [
-    1064877261444087869,
-    1064877262756909086,
-    1064877263901958194,
-    1064877265051201639,
-    1064877267001548860,
-]
+messages = []
 # game to use, can be bf4 or bf1
 game = 'Bf4'
