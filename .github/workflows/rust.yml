@@ -16,7 +16,6 @@ jobs:
             bin: discord_playerlist
             name: discord_playerlist-Linux-x86_64-musl.tar.gz
             cross: false
-            cargo_command: cargo
 
           - os: windows-latest
             os_name: Windows-aarch64
@@ -24,7 +23,6 @@ jobs:
             bin: discord_playerlist.exe
             name: discord_playerlist-Windows-aarch64.zip
             cross: false
-            cargo_command: cargo
 
           - os: macOS-latest
             os_name: macOS-x86_64
@@ -32,7 +30,6 @@ jobs:
             bin: discord_playerlist
             name: discord_playerlist-Darwin-x86_64.tar.gz
             cross: false
-            cargo_command: cargo
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -65,7 +62,7 @@ jobs:
       - name: Build binary (*nix)
         shell: bash
         run: |
-                    ${{ matrix.platform.cargo_command }} build --locked --release --target ${{ matrix.platform.target }}
+                    cargo build --locked --release --target ${{ matrix.platform.target }}
         if: ${{ !contains(matrix.platform.os, 'windows') }}
       - name: Build binary (Windows)
         # We have to use the platform's native shell. If we use bash on
@@ -73,7 +70,7 @@ jobs:
         # the platform's native paths and refuses to build.
         shell: powershell
         run: |
-                    & ${{ matrix.platform.cargo_command }} build --locked --release --target ${{ matrix.platform.target }}
+                    & cargo build --locked --release --target ${{ matrix.platform.target }}
         if: contains(matrix.platform.os, 'windows')
       - name: Strip binary
         shell: bash
