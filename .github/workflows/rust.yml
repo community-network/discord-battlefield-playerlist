@@ -33,6 +33,7 @@ jobs:
             name: discord_playerlist-Darwin-x86_64.tar.gz
             cross: false
             cargo_command: cargo
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
