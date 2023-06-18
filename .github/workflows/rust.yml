@@ -6,29 +6,28 @@ on:
 jobs:
   release:
     name: Release - ${{ matrix.platform.os_name }}
-    if: startsWith( github.ref, 'refs/tags/v' ) || github.ref == 'refs/tags/test-release'
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macOS-latest]
         include:
-          - os_name: Linux-x86_64
-            os: ubuntu-latest
+          - os: ubuntu-latest
+            os_name: Linux-x86_64
             target: x86_64-unknown-linux-musl
             bin: discord_playerlist
             name: discord_playerlist-Linux-x86_64-musl.tar.gz
             cross: false
             cargo_command: cargo
 
-          - os_name: Windows-aarch64
-            os: windows-latest
+          - os: windows-latest
+            os_name: Windows-aarch64
             target: aarch64-pc-windows-msvc
             bin: discord_playerlist.exe
             name: discord_playerlist-Windows-aarch64.zip
             cross: false
             cargo_command: cargo
 
-          - os_name: macOS-x86_64
-            os: macOS-latest
+          - os: macOS-latest
+            os_name: macOS-x86_64
             target: x86_64-apple-darwin
             bin: discord_playerlist
             name: discord_playerlist-Darwin-x86_64.tar.gz
