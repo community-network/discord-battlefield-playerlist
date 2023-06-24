@@ -50,7 +50,15 @@ impl EventHandler for Handler {
         tokio::spawn(async move {
             loop {
                 cfg = match gather_table(&cfg, &client).await {
-                    Ok((title, tables)) => send_info(&ctx, cfg, tables, title).await,
+                    Ok((title, tables)) => {
+                        match send_info(&ctx, cfg.clone(), tables, title).await {
+                            Ok(cfg) => cfg,
+                            Err(e) => {
+                                log::error!("Couldn't send message: {:#?}", e);
+                                cfg
+                            }
+                        }
+                    }
                     Err(e) => {
                         log::error!("Couldn't get serverinfo: {:#?}", e);
                         cfg
@@ -69,16 +77,19 @@ async fn send_info(
     mut cfg: structs::config::SenderConfig,
     tables: Vec<String>,
     title: String,
-) -> structs::config::SenderConfig {
+) -> anyhow::Result<structs::config::SenderConfig> {
     if cfg.messages.len() >= 5 {
         let mut index = 0;
 
-        ChannelId(cfg.channel)
+        match ChannelId(cfg.channel)
             .edit_message(&ctx.http, cfg.messages[index], |m| {
                 m.content(format!("```\n{}\n```", title))
             })
             .await
-            .unwrap();
+        {
+            Ok(_) => {}
+            Err(e) => log::error!("Failed to send title message: {:#?}", e),
+        };
 
         index += 1;
 
@@ -86,21 +97,27 @@ async fn send_info(
             let text: Vec<&str> = content.split("\n").collect();
             let (first_message, second_message) = text.split_at(text.len() / 2);
 
-            ChannelId(cfg.channel)
+            match ChannelId(cfg.channel)
                 .edit_message(&ctx.http, cfg.messages[index], |m| {
                     m.content(format!("```\n{}\n```", first_message.join("\n")))
                 })
                 .await
-                .unwrap();
+            {
+                Ok(_) => {}
+                Err(e) => log::error!("Failed to send first team's message: {:#?}", e),
+            };
 
             index += 1;
 
-            ChannelId(cfg.channel)
+            match ChannelId(cfg.channel)
                 .edit_message(&ctx.http, cfg.messages[index], |m| {
                     m.content(format!("```\n{}\n```", second_message.join("\n")))
                 })
                 .await
-                .unwrap();
+            {
+                Ok(_) => {}
+                Err(e) => log::error!("Failed to send second team's message: {:#?}", e),
+            };
 
             index += 1;
         }
@@ -109,35 +126,56 @@ async fn send_info(
 
         cfg.messages = vec![];
 
-        let title_result = ChannelId(cfg.channel)
+        match ChannelId(cfg.channel)
             .send_message(&ctx.http, |m| m.content(format!("```\n{}\n```", title)))
             .await
-            .unwrap();
-        cfg.messages.push(*title_result.id.as_u64());
+        {
+            Ok(title_result) => {
+                cfg.messages.push(*title_result.id.as_u64());
+            }
+            Err(e) => {
+                cfg.messages.clear();
+                anyhow::bail!("Failed to set message: {}", e);
+            }
+        };
 
         for content in tables.iter() {
             let text: Vec<&str> = content.split("\n").collect();
             let (first_message, second_message) = text.split_at(text.len() / 2);
 
-            let first_result = ChannelId(cfg.channel)
+            match ChannelId(cfg.channel)
                 .send_message(&ctx.http, |m| {
                     m.content(format!("```\n{}\n```", first_message.join("\n")))
                 })
                 .await
-                .unwrap();
-            cfg.messages.push(*first_result.id.as_u64());
+            {
+                Ok(first_result) => {
+                    cfg.messages.push(*first_result.id.as_u64());
+                }
+                Err(e) => {
+                    cfg.messages.clear();
+                    anyhow::bail!("Failed to set message: {}", e);
+                }
+            };
 
-            let second_result = ChannelId(cfg.channel)
+            match ChannelId(cfg.channel)
                 .send_message(&ctx.http, |m| {
                     m.content(format!("```\n{}\n```", second_message.join("\n")))
                 })
                 .await
-                .unwrap();
-            cfg.messages.push(*second_result.id.as_u64());
+            {
+                Ok(second_result) => {
+                    cfg.messages.push(*second_result.id.as_u64());
+                }
+                Err(e) => {
+                    cfg.messages.clear();
+                    anyhow::bail!("Failed to set message: {}", e);
+                }
+            };
         }
         confy::store_path("config.txt", cfg.clone()).unwrap();
     }
-    cfg
+    Ok(cfg)
 }
 
 async fn gather_table(
@@ -146,9 +184,19 @@ async fn gather_table(
 ) -> anyhow::Result<(String, Vec<String>)> {
     Ok(match cfg.game {
         structs::config::Games::Bf1 => {
-            let result = to_table::player_list::request_player_list(&cfg.server_name, client)
+            let result = match to_table::player_list::request_player_list(&cfg.server_name, client)
                 .await
-                .unwrap();
+            {
+                Ok(result) => result,
+                // retry
+                Err(_) => {
+                    match to_table::player_list::request_player_list(&cfg.server_name, client).await
+                    {
+                        Ok(result) => result,
+                        Err(e) => anyhow::bail!("Couldn't get bf1 playerlist {:#?}", e),
+                    }
+                }
+            };
 
             let (title, tables) =
                 match to_table::seeder_player_list::request_player_list(&cfg.server_name, client)
@@ -164,9 +212,15 @@ async fn gather_table(
             (title, tables)
         }
         structs::config::Games::Bf4 => {
-            let result = to_table::bf4_player_list::request_player_list(&cfg.server_name, client)
-                .await
-                .unwrap();
+            let result = match to_table::bf4_player_list::request_player_list(
+                &cfg.server_name,
+                client,
+            )
+            .await
+            {
+                Ok(result) => result,
+                Err(e) => anyhow::bail!("Couldn't get bf4 playerlist {:#?}", e),
+            };
 
             to_table::bf4_player_list::to_tables(&result).await
         }

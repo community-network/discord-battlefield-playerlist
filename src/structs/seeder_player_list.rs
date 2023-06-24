@@ -42,11 +42,20 @@ pub struct SeederPlayerPlatoon {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct SeederPlayerClass {
-    pub id: String,
-    pub name: Option<String>,
+pub struct ClassIcons {
+    pub id: Option<String>,
     pub black: Option<String>,
     pub white: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct SeederPlayerClass {
+    pub class_id: String,
+    pub class_name: Option<String>,
+    pub class_kit: Option<String>,
+    pub class_info1: Option<String>,
+    pub class_info2: Option<String>,
+    pub class_icons: Option<ClassIcons>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

@@ -1,5 +1,4 @@
 use anyhow::Result;
-use chrono::Utc;
 use reqwest::Url;
 use tabular::row;
 

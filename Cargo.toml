@@ -6,24 +6,24 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-serde_json = { version = "1.0.91" }
-serde = { version = "1.0.152", features = ["derive"] }
-tokio = { version = "1.23.0", features = ["rt", "rt-multi-thread"] }
-anyhow = "1.0.68"
-flexi_logger = "0.25.5"
-log = "0.4.17"
-warp = "0.3.3"
-chrono = "0.4.23"
-tabular = "0.2.0"
-confy = "0.5.1"
-timeago = { version = "0.4.0", features = ["chrono"] }
+serde_json = { version = "1.0" }
+serde = { version = "1.0", features = ["derive"] }
+tokio = { version = "1.28", features = ["rt", "rt-multi-thread"] }
+anyhow = "1.0"
+flexi_logger = "0.25"
+log = "0.4"
+warp = "0.3"
+chrono = "0.4"
+tabular = "0.2"
+confy = "0.5"
+timeago = { version = "0.4", features = ["chrono"] }
 
 [dependencies.serenity]
-version = "0.11.5"
+version = "0.11"
 default-features = false
 features = ["client", "gateway", "rustls_backend", "model", "cache"]
 
 [dependencies.reqwest]
-version = "0.11.13"
+version = "0.11"
 default-features = false
 features = ["rustls-tls", "json"]

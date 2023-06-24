@@ -13,7 +13,6 @@ pub async fn request_player_list(
 ) -> Result<structs::seeder_player_list::SeederPlayerList> {
     let mut url = Url::parse("https://api.gametools.network/bf1/seederplayers/").unwrap();
     url.query_pairs_mut().append_pair("name", server_name);
-
     let result = client
         .get(url)
         .send()
@@ -60,7 +59,16 @@ pub async fn to_tables(
         sorted_players.sort_by_key(|item| item.index);
 
         if sorted_players.len() <= 0 {
-            table.add_row(row!("N/A", "This team is empty", "N/A", "N/A"));
+            table.add_row(row!(
+                "N/A",
+                "This team is empty",
+                "N/A",
+                "N/A",
+                "N/A",
+                "N/A",
+                "N/A",
+                "N/A"
+            ));
         }
 
         for seeder_player in sorted_players {
@@ -99,7 +107,7 @@ pub async fn to_tables(
 
             table.add_row(row!(
                 seeder_player.squad_name,
-                match seeder_player.player_class.name {
+                match seeder_player.player_class.class_name {
                     Some(class) => class,
                     None => "".into(),
                 },
