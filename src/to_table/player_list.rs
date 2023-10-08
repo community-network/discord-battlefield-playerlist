@@ -30,7 +30,7 @@ pub async fn to_tables(result: &structs::player_list::PlayerList) -> (String, Ve
         let mut sorted_players = team.players.clone();
         sorted_players.sort_by_key(|item| item.slot);
 
-        if sorted_players.len() <= 0 {
+        if sorted_players.len() == 0 {
             table.add_row(row!("N/A", "This team is empty", "N/A", "N/A"));
         }
 

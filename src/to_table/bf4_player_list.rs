@@ -30,7 +30,7 @@ pub async fn to_tables(
                     .with_heading(team.teamid.clone())
                     .with_row(row!("Rank", "Name", "Score", "KD",));
 
-                if team.players.len() <= 0 {
+                if team.players.len() == 0 {
                     table.add_row(row!("N/A", "This team is empty", "N/A", "N/A"));
                 }
 

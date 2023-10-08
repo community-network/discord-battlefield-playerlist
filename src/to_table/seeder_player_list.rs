@@ -58,7 +58,7 @@ pub async fn to_tables(
         let mut sorted_players = team.players.clone();
         sorted_players.sort_by_key(|item| item.index);
 
-        if sorted_players.len() <= 0 {
+        if sorted_players.len() == 0 {
             table.add_row(row!(
                 "N/A",
                 "This team is empty",
