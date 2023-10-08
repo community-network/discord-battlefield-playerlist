@@ -94,7 +94,7 @@ async fn send_info(
         index += 1;
 
         for content in tables.iter() {
-            let text: Vec<&str> = content.split("\n").collect();
+            let text: Vec<&str> = content.split('\n').collect();
             let (first_message, second_message) = text.split_at(text.len() / 2);
 
             match ChannelId(cfg.channel)
@@ -140,7 +140,7 @@ async fn send_info(
         };
 
         for content in tables.iter() {
-            let text: Vec<&str> = content.split("\n").collect();
+            let text: Vec<&str> = content.split('\n').collect();
             let (first_message, second_message) = text.split_at(text.len() / 2);
 
             match ChannelId(cfg.channel)
